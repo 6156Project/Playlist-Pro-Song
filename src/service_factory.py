@@ -33,7 +33,7 @@ class ServiceFactory:
         )
         self.rds_service = RDSDataService(self.rds_svc_config)
         # connect songs resource to rds
-        self.songs_service_config = SongsResourceConfig(self.rds_service, "PlaylistPro.Song")
+        self.songs_service_config = SongsResourceConfig(self.rds_service, "PlaylistSong.songs")
         self.songs_resource = SongsResource(self.songs_service_config)
 
         self.musixmatch_config = MusixmatchApiConfig(
