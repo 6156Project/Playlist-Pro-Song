@@ -66,5 +66,4 @@ def do_resource_search():
     return rsp
 
 if __name__ == "__main__":
-    application.run(port=5011)
-
+    application.run(host="0.0.0.0", port=5011)
