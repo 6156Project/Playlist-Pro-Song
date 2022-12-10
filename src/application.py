@@ -23,7 +23,7 @@ CORS(application)
 service_factory = ServiceFactory()
 
 
-@application.route("/api/health", methods=["GET"])
+@application.route("/api/songs/health", methods=["GET"])
 def get_health():
     msg = {
         "name": "PlaylistSong Microservice",
@@ -52,7 +52,7 @@ def do_resource_collection(resource_collection):
     return rsp
 
 # /search
-@application.route('/api/search', methods=['GET'])
+@application.route('/api/songs/search', methods=['GET'])
 def do_resource_search():
     request_inputs = rest_utils.RESTContext(request)
     svc = service_factory.get('search', None)
