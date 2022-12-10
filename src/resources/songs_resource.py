@@ -6,6 +6,7 @@ class SongsResource(BaseResource):
     def __init__(self, config):
         super().__init__(config)
         self.data_service = None
+        self.columns = ['song_id', 'song_name', 'artist_id', 'artist_name', 'album_id', 'album_name']
 
     def get_full_collection_name(self):
         return self.config.collection_name
@@ -33,7 +34,18 @@ class SongsResource(BaseResource):
     # should not be able to create/delete/update new songs
     def create_resource(self, resource_data):
       # check body keys are the same or ones required
-        return super.create_resource(resource_data)
+        response = {}
+        if not resource_data:
+            response['status'] = 400
+            response['text'] = 'Empty data'
+        elif not all(columns in resource_data for columns in self.columns):
+            response['status'] = 400
+            response['text'] = 'Missing data required'
+        else:
+            # check structure of song
+            response = super().create_resource(resource_data)
+
+        return response
 
     def delete_resource(self, resource_data):
         pass
