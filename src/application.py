@@ -55,7 +55,7 @@ def do_resource_collection(resource_collection):
 
 # /search
 @application.route('/api/songs/search', methods=['GET','OPTIONS'])
-@cross_origin
+@cross_origin()
 def do_resource_search():
     request_inputs = rest_utils.RESTContext(request)
     svc = service_factory.get('search', None)
