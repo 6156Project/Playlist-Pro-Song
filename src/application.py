@@ -5,7 +5,7 @@ import rest_utils
 from service_factory import ServiceFactory
 # from playlists_resource import PlaylistResource
 # from playlist_song_resource import PlaylistSongResource
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 from dotenv import load_dotenv
 
 # load environment variables fron .env
@@ -33,7 +33,8 @@ def get_health():
     return rsp
 
 # /songs
-@application.route('/api/<resource_collection>', methods=['GET','POST'])
+@application.route('/api/<resource_collection>', methods=['GET','POST','OPTIONS'])
+@cross_origin()
 def do_resource_collection(resource_collection):
     request_inputs = rest_utils.RESTContext(request, resource_collection)
     svc = service_factory.get(resource_collection, None)
@@ -45,13 +46,16 @@ def do_resource_collection(resource_collection):
     elif request_inputs.method == "POST":
         res = svc.create_resource(resource_data=request_inputs.data)
         rsp = Response(res['text'], status=res['status'], content_type="text/plain")
+    elif request_inputs.method == "OPTIONS":
+        rsp = Response("Options", status=200, content_type="application/json")
     else:
         rsp = Response("NOT IMPLEMENTED", status=501, content_type="text/plain")
 
     return rsp
 
 # /search
-@application.route('/api/songs/search', methods=['GET'])
+@application.route('/api/songs/search', methods=['GET','OPTIONS'])
+@cross_origin
 def do_resource_search():
     request_inputs = rest_utils.RESTContext(request)
     svc = service_factory.get('search', None)
@@ -59,6 +63,8 @@ def do_resource_search():
     if request_inputs.method == "GET":
         res = svc.get_songs(request_inputs.args)
         rsp = Response(json.dumps(res, default=str), status=200, content_type="application/json")
+    elif request_inputs.method == "OPTIONS":
+        rsp = Response("Options", status=200, content_type="application/json")
     else:
         rsp = Response("NOT IMPLEMENTED", status=501, content_type="text/plain")
 
