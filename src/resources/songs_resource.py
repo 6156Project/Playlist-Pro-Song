@@ -17,7 +17,11 @@ class SongsResource(BaseResource):
         return self.data_service
 
     def get_resource_by_id(self, id):
-        pass
+        template = {'song_id': id}
+        response = self.get_by_template(template=template)
+        if response['status'] == 200:
+            response['links'] = []
+        return response
 
     def get_by_template(self,
                         relative_path=None,
@@ -28,8 +32,17 @@ class SongsResource(BaseResource):
                         offset=None,
                         order_by=None):
         # can store sql results in value to format
-        return super().get_by_template(relative_path, path_parameters, template, field_list,
+        response = {'status': '', 'text':'', 'body':{}, 'links':[]}
+        rsp = super().get_by_template(relative_path, path_parameters, template, field_list,
                                          limit, offset, order_by)
+        if rsp:
+            response['status'] = 200
+            response['text'] = 'OK'
+            response['body'] = rsp
+        else:
+            response['status'] = 404
+            response['text'] = 'Resource not found.'
+        return response
 
     # should not be able to create/delete/update new songs
     def create_resource(self, resource_data):

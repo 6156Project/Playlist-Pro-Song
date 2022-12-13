@@ -53,6 +53,23 @@ def do_resource_collection(resource_collection):
 
     return rsp
 
+# songs get info
+@application.route("/api/songs/<id>", methods=["GET", "OPTIONS"])
+@cross_origin()
+def getPlaylist(id):
+    request_inputs = rest_utils.RESTContext(request, id)
+    svc = service_factory.get("songs", None)
+
+    if request_inputs.method == "GET":
+        res = svc.get_resource_by_id(id)
+        rsp = Response(json.dumps(res, default=str), status=200, content_type="application/json")
+    elif request_inputs.method == "OPTIONS":
+        rsp = Response("Options", status=200, content_type="application/json")
+    else:
+        rsp = Response("NOT IMPLEMENTED", status=501, content_type="text/plain")
+
+    return rsp
+
 # /search
 @application.route('/api/songs/search', methods=['GET','OPTIONS'])
 @cross_origin()
