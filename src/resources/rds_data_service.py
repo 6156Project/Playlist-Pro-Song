@@ -93,35 +93,38 @@ class RDSDataService(BaseDataService):
 
     def delete_resource(self, collection_name, template):
         conn = self._get_connection()
-        cursor = conn.cursor()
         result = {}
-        res = cursor.execute(f"DELETE FROM {collection_name} WHERE {self.__dict_to_sql(template, 'where')}")
-        if res == 1:
-            result['text'] = "Resource deleted."
-            result['status'] = 201
-        else:
-            result['text'] = "Resource not found"
-            result['status'] = 404
-        self.connection.commit()
-        self._close_connection()
 
+        with conn:
+            with conn.cursor() as cursor:
+                conn.ping(reconnect=True) 
+                res = cursor.execute(f"DELETE FROM {collection_name} WHERE {self.__dict_to_sql(template, 'where')}")
+                if res == 1:
+                    result['text'] = "Resource deleted."
+                    result['status'] = 201
+                else:
+                    result['text'] = "Resource not found"
+                    result['status'] = 404
         return result
 
 
     def update_resource(self, collection_name, values, template):
         conn = self._get_connection()
-        cursor = conn.cursor()
         result = {}
-        set_statement = self.__dict_to_sql(values, 'set')
-        where_statement = self.__dict_to_sql(template, 'where')
-        sql = f"UPDATE {collection_name} SET {set_statement} WHERE {where_statement}"
-        res = cursor.execute(sql)
-        if res == 1:
-            result['text'] = "Resource updated."
-            result['status'] = 201
-        self.connection.commit()
-        self._close_connection()
 
+        with conn:
+            with conn.cursor() as cursor:
+                conn.ping(reconnect=True) 
+                set_statement = self.__dict_to_sql(values, 'set')
+                where_statement = self.__dict_to_sql(template, 'where')
+                sql = f"UPDATE {collection_name} SET {set_statement} WHERE {where_statement}"
+                res = cursor.execute(sql)
+                if res == 1:
+                    result['text'] = "Resource updated."
+                    result['status'] = 201
+                else:
+                    result['text'] = "Resource not found"
+                    result['status'] = 404
         return result
 
 
