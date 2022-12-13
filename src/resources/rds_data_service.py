@@ -39,14 +39,13 @@ class RDSDataService(BaseDataService):
             sql += " WHERE " + self.__dict_to_sql(template, 'where')
 
         conn = self._get_connection()
-        cursor = conn.cursor()
-        res = cursor.execute(sql)
-        if res >= 1:
-            result = cursor.fetchall()
-        else:
-            result = None
-
-        self._close_connection()
+        result = None
+        with conn:
+            with conn.cursor() as cursor:
+                conn.ping(reconnect=True) 
+                res = cursor.execute(sql)
+                if res >= 1:
+                    result = cursor.fetchall()
 
         return result
 
@@ -72,7 +71,11 @@ class RDSDataService(BaseDataService):
         try:
             res = cursor.execute(f"INSERT INTO {collection_name} ({columns}) VALUES ({values})")
         except pymysql.IntegrityError as e:
-            result['text'] = "Resource already exists."
+
+            if e.args[0] == 1452:
+                result['text'] = 'Resource constraint fail.'
+            else:
+                result['text'] = 'Resource already exists.'
             result['status'] = 409
         except pymysql.OperationalError as e:
             result['text'] = repr(e)
@@ -86,6 +89,7 @@ class RDSDataService(BaseDataService):
         self._close_connection()
 
         return result
+
 
     def delete_resource(self, collection_name, template):
         conn = self._get_connection()
@@ -102,6 +106,7 @@ class RDSDataService(BaseDataService):
         self._close_connection()
 
         return result
+
 
     def update_resource(self, collection_name, values, template):
         conn = self._get_connection()
@@ -135,7 +140,3 @@ class RDSDataService(BaseDataService):
             sql = ", ".join(sql_list)
 
         return sql
-
-    # def __clear_template(self, template):
-    #     clean_template = { key : value for (key, value) in template if key in self.list_columns() }
-    #     return clean_template
