@@ -66,27 +66,27 @@ class RDSDataService(BaseDataService):
         values = ','.join('"' + item + '"' for item in str_values)
 
         conn = self._get_connection()
-        cursor = conn.cursor()
         result = {}
-        try:
-            res = cursor.execute(f"INSERT INTO {collection_name} ({columns}) VALUES ({values})")
-        except pymysql.IntegrityError as e:
 
-            if e.args[0] == 1452:
-                result['text'] = 'Resource constraint fail.'
-            else:
-                result['text'] = 'Resource already exists.'
-            result['status'] = 409
-        except pymysql.OperationalError as e:
-            result['text'] = repr(e)
-            result['status'] = 409
-        else:
-            if res == 1:
-                result['text'] = "Resource created."
-                result['status'] = 201
+        with conn:
+            with conn.cursor() as cursor:
+                conn.ping(reconnect=True) 
+                try:
+                    res = cursor.execute(f"INSERT INTO {collection_name} ({columns}) VALUES ({values})")
+                except pymysql.IntegrityError as e:
 
-        self.connection.commit()
-        self._close_connection()
+                    if e.args[0] == 1452:
+                        result['text'] = 'Resource constraint fail.'
+                    else:
+                        result['text'] = 'Resource already exists.'
+                    result['status'] = 409
+                except pymysql.OperationalError as e:
+                    result['text'] = repr(e)
+                    result['status'] = 409
+                else:
+                    if res == 1:
+                        result['text'] = "Resource created."
+                        result['status'] = 201
 
         return result
 
