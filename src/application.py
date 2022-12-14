@@ -45,7 +45,7 @@ def do_resource_collection(resource_collection):
         rsp = Response(json.dumps(res, default=str), status=200, content_type="application/json")
     elif request_inputs.method == "POST":
         res = svc.create_resource(resource_data=request_inputs.data)
-        rsp = Response(res['text'], status=res['status'], content_type="text/plain")
+        rsp = Response(json.dumps(res, default=str), status=200, content_type="application/json")
     elif request_inputs.method == "OPTIONS":
         rsp = Response("Options", status=200, content_type="application/json")
     else:
