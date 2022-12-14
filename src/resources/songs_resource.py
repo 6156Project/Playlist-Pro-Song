@@ -47,7 +47,7 @@ class SongsResource(BaseResource):
     # should not be able to create/delete/update new songs
     def create_resource(self, resource_data):
       # check body keys are the same or ones required
-        response = {}
+        response = {'status': '', 'text':'', 'body':{}, 'links':[]}
         if not resource_data:
             response['status'] = 400
             response['text'] = 'Empty data'
@@ -56,7 +56,29 @@ class SongsResource(BaseResource):
             response['text'] = 'Missing data required'
         else:
             # check structure of song
-            response = super().create_resource(resource_data)
+            values = {
+                'song_id': resource_data['song_id'],
+                'song_name': resource_data['song_name'],
+                'artist_id': resource_data['artist_id'],
+                'artist_name': resource_data['artist_name'],
+                'album_id': resource_data['album_id'],
+                'album_name': resource_data['album_name']
+            }
+            rsp = super().create_resource(values)
+            if rsp['status'] == 201:
+                response['status'] = rsp['status']
+                response['text'] = 'Resource created.' 
+                response['body'] = {}
+                response['links'] = [
+                    {
+                        "href": f"api/songs/{values['song_id']}",
+                        "rel": "self",
+                        "type" : "GET"
+                    }
+                    ]
+            else:
+                response['status'] = rsp['status']
+                response['text'] = rsp['text']
 
         return response
 
